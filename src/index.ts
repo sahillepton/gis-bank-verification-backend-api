@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 4000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Routes
 //app.use('/api', bankRoutes);
@@ -23,11 +23,10 @@ app.get('/api/bank-update', (req, res) => {
         return res.status(400).send('Missing required bank information parameters');
     }
 
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
 // Start server
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`Bank update page available at: http://localhost:${PORT}/api/bank-update`);
+   
 }); 
