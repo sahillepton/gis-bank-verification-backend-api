@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bank Information</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .bank-info {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .confirm-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .edit-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="bank-info">
+        <h2>Bank Information</h2>
+        <div id="viewMode">
+            <div class="form-group">
+                <label>Bank Name:</label>
+                <p id="bankName"></p>
+            </div>
+            <div class="form-group">
+                <label>Branch Name:</label>
+                <p id="branchName"></p>
+            </div>
+            <div class="form-group">
+                <label>IFSC Code:</label>
+                <p id="ifscCode"></p>
+            </div>
+            <div class="form-group">
+                <label>UFI:</label>
+                <p id="ufi"></p>
+            </div>
+            <div class="form-group">
+                <label>Address:</label>
+                <p id="address"></p>
+            </div>
+        </div>
+
+        <form id="editForm" class="hidden">
+            <div class="form-group">
+                <label for="editBankName">Bank Name:</label>
+                <input type="text" id="editBankName" name="bankName" required>
+            </div>
+            <div class="form-group">
+                <label for="editBranchName">Branch Name:</label>
+                <input type="text" id="editBranchName" name="branchName" required>
+            </div>
+            <div class="form-group">
+                <label for="editIfscCode">IFSC Code:</label>
+                <input type="text" id="editIfscCode" name="ifscCode" required>
+            </div>
+            <div class="form-group">
+                <label for="editUfi">UFI:</label>
+                <input type="text" id="editUfi" name="ufi" required>
+            </div>
+            <div class="form-group">
+                <label for="editAddress">Address:</label>
+                <input type="text" id="editAddress" name="address" required>
+            </div>
+        </form>
+
+        <div class="buttons">
+            <button class="confirm-btn" onclick="confirmBankInfo()">Confirm</button>
+            <button class="edit-btn" onclick="toggleEditMode()">Edit</button>
+        </div>
+    </div>
+
+    <script>
+        const SHEETY_API = 'https://api.sheety.co/632604ca09353483222880568eb0ebe2/bankAddressForCalling/banks';
+        let currentBank = null;
+        let isEditMode = false;
+
+        // Function to load bank data from URL parameters
+        function loadBankData() {
+            const urlParams = new URLSearchParams(window.location.search);
+            currentBank = {
+                id: urlParams.get('bankId'),
+                bankName: urlParams.get('bankName'),
+                branchName: urlParams.get('branchName'),
+                ifscCode: urlParams.get('ifscCode'),
+                ufi: urlParams.get('ufi'),
+                address: urlParams.get('address')
+            };
+
+            // Display bank data
+            document.getElementById('bankName').textContent = currentBank.bankName;
+            document.getElementById('branchName').textContent = currentBank.branchName;
+            document.getElementById('ifscCode').textContent = currentBank.ifscCode;
+            document.getElementById('ufi').textContent = currentBank.ufi;
+            document.getElementById('address').textContent = currentBank.address;
+
+            // Set form values
+            document.getElementById('editBankName').value = currentBank.bankName;
+            document.getElementById('editBranchName').value = currentBank.branchName;
+            document.getElementById('editIfscCode').value = currentBank.ifscCode;
+            document.getElementById('editUfi').value = currentBank.ufi;
+            document.getElementById('editAddress').value = currentBank.address;
+        }
+
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            document.getElementById('viewMode').classList.toggle('hidden');
+            document.getElementById('editForm').classList.toggle('hidden');
+        }
+
+        async function confirmBankInfo() {
+            if (isEditMode) {
+                const formData = new FormData(document.getElementById('editForm'));
+                const values = Object.fromEntries(formData.entries());
+                
+                try {
+                    await axios.put(`${SHEETY_API}/${currentBank.id}`, {
+                        bank: {
+                            ...currentBank,
+                            ...values,
+                        },
+                    });
+                    alert('Bank information updated successfully!');
+                    toggleEditMode();
+                    loadBankData(); // Reload the data
+                } catch (error) {
+                    alert('Error updating bank information: ' + error.message);
+                }
+            } else {
+                alert('Bank information confirmed!');
+                // Add your confirmation logic here
+            }
+        }
+
+        // Load bank data when page loads
+        window.onload = loadBankData;
+    </script>
+</body>
+</html> 
